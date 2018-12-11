@@ -1,5 +1,3 @@
-
-
 variable static_site_name {}
 variable static_site_bucket_name {}
 variable static_site_acl {}
@@ -10,17 +8,16 @@ variable static_site_route53_domain_name {}
 
 
 
-data "aws_route53_zone" "static_site_zone" {
+data "aws_route53_zone" "this" {
   name = "${var.static_site_route53_zone_name}"
 }
 
-resource "aws_s3_bucket" "static-site" {
+resource "aws_s3_bucket" "this" {
   bucket = "${var.static_site_bucket_name}"
   region = "${var.aws_region}"
 
   acl = "${var.static_site_acl}"
 
-  #policy = "${file("policy.json")}"
   policy = <<EOF
 {
   "Id": "static_site_policy_${var.static_site_name}",
@@ -47,26 +44,26 @@ EOF
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
-resource "aws_route53_record" "static_site_domain" {
-  zone_id = "${data.aws_route53_zone.static_site_zone.zone_id}"
+resource "aws_route53_record" "this" {
+  zone_id = "${data.aws_route53_zone.this.zone_id}"
   name    = "${var.static_site_route53_domain_name}"
   type    = "A"
 
   alias {
-    name                   = "${aws_s3_bucket.static-site.website_domain}"
-    zone_id                = "${aws_s3_bucket.static-site.hosted_zone_id}"
+    name                   = "${aws_s3_bucket.this.website_domain}"
+    zone_id                = "${aws_s3_bucket.this.hosted_zone_id}"
     evaluate_target_health = true
   }
 }
 
 output "static_site_bucket_name" {
-  value = "${aws_s3_bucket.static-site.bucket}"
+  value = "${aws_s3_bucket.this.bucket}"
 }
 
 output "static_site_website_endpoint" {
-  value = "${aws_s3_bucket.static-site.website_endpoint}"
+  value = "${aws_s3_bucket.this.website_endpoint}"
 }
 
 output "static_site_website_domain" {
-  value = "${aws_s3_bucket.static-site.website_domain}"
+  value = "${aws_s3_bucket.this.website_domain}"
 }

@@ -1,7 +1,6 @@
 variable state_bucket_name {}
 
-
-resource "aws_s3_bucket" "state" {
+resource "aws_s3_bucket" "this" {
   bucket = "${var.state_bucket_name}"
   region = "${var.aws_region}"
 
@@ -21,5 +20,5 @@ resource "aws_s3_bucket" "state" {
 }
 
 output "BACKEND_BUCKET_NAME" {
-  value = "${aws_s3_bucket.state.bucket}"
+  value = "${aws_s3_bucket.this.bucket}"
 }

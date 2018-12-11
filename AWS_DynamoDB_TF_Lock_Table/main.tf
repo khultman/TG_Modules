@@ -1,11 +1,9 @@
-
-
 variable lock_table_name {}
 variable dynamodb_read_capacity {}
 variable dynamodb_write_capacity {}
 
 
-resource "aws_dynamodb_table" "locking" {
+resource "aws_dynamodb_table" "this" {
   name           = "${var.lock_table_name}"
   read_capacity  = "${var.dynamodb_read_capacity}"
   write_capacity = "${var.dynamodb_write_capacity}"
@@ -20,5 +18,5 @@ resource "aws_dynamodb_table" "locking" {
 }
 
 output "BACKEND_TABLE_NAME" {
-  value = "${aws_dynamodb_table.locking.name}"
+  value = "${aws_dynamodb_table.this.name}"
 }
