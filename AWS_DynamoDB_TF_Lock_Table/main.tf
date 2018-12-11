@@ -2,7 +2,6 @@ variable lock_table_name {}
 variable dynamodb_read_capacity {}
 variable dynamodb_write_capacity {}
 
-
 resource "aws_dynamodb_table" "this" {
   name           = "${var.lock_table_name}"
   read_capacity  = "${var.dynamodb_read_capacity}"

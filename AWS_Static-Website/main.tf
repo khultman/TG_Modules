@@ -6,8 +6,6 @@ variable static_site_error_document {}
 variable static_site_route53_zone_name {}
 variable static_site_route53_domain_name {}
 
-
-
 data "aws_route53_zone" "this" {
   name = "${var.static_site_route53_zone_name}"
 }
