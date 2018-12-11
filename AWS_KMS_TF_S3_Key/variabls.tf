@@ -1,0 +1,1 @@
+../aws-common-configuration.tf
