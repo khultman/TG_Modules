@@ -88,7 +88,7 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
   instead of throwing a error.
 */
 locals {
-  requester_pri_rt_hack = [ "${data.terraform_remote_state.requester_state.public_route_table_ids}", "LastElement" ]
+  requester_pri_rt_hack = [ "${data.terraform_remote_state.requester_state.private_route_table_ids}", "LastElement" ]
   requester_pub_rf_hack = [ "${data.terraform_remote_state.requester_state.public_route_table_ids}", "LastElement" ]
 
   requester_route_table_id = "${ var.requester_route_table_public_private == "public" ?
@@ -107,7 +107,7 @@ resource "aws_route" "requester_to_accepter_route" {
 }
 
 locals {
-  accepter_pri_rt_hack = [ "${data.terraform_remote_state.accepter_state.public_route_table_ids}", "LastElement" ]
+  accepter_pri_rt_hack = [ "${data.terraform_remote_state.accepter_state.private_route_table_ids}", "LastElement" ]
   accepter_pub_rt_hack = [ "${data.terraform_remote_state.accepter_state.public_route_table_ids}", "LastElement" ]
 
   accepter_route_table_id = "${ var.accepter_route_table_public_private == "public" ?
