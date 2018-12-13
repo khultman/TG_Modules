@@ -34,12 +34,28 @@ data "aws_caller_identity" "caller" {
 }
 data "terraform_remote_state" "requester_state" {
   backend = "${var.requester_backend}"
-  config { "${ merge( "${var.ecosystem_config}", map("key", "${var.requester_state_file}") ) }" }
+  config {
+    bucket = "${var.state_bucket_name}"
+    region = "${var.aws_region}"
+    key = "${var.requester_state_file}"
+    encrypt = true
+    dynamodb_table = "${var.lock_table_name}"
+    kms_key_id = "${var.kms_key_id}"
+  }
+  // config = "${ merge( "${var.ecosystem_config}", map("key", "${var.requester_state_file}") ) }" }
 }
 
 data "terraform_remote_state" "accepter_state" {
   backend = "${var.accepter_backend}"
-  config { "${ merge( "${var.ecosystem_config}", map("key", "${var.accepter_state_file}") ) }" }
+  config {
+    bucket = "${var.state_bucket_name}"
+    region = "${var.aws_region}"
+    key = "${var.accepter_state_file}"
+    encrypt = true
+    dynamodb_table = "${var.lock_table_name}"
+    kms_key_id = "${var.kms_key_id}"
+  }
+  //config = "${ merge( "${var.ecosystem_config}", map("key", "${var.accepter_state_file}") ) }"
 }
 
 resource "aws_vpc_peering_connection" "requester" {
