@@ -30,7 +30,7 @@ variable accepter_route_table_public_private { default = "private" }
 variable accepter_route_table_idx { default = 0 }
 
 data "aws_caller_identity" "caller" {
-  provider = "${var.provider}"
+  provider = "aws"
 }
 data "terraform_remote_state" "requester_state" {
   backend = "${var.requester_backend}"
