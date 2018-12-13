@@ -102,9 +102,9 @@ resource "aws_route" "requester_to_accepter_route" {
 locals {
   accepter_pri_rt_hack = [ "${data.terraform_remote_state.accepter_state.public_route_table_ids}", "LastElement" ]
   accepter_pub_rt_hack = [ "${data.terraform_remote_state.accepter_state.public_route_table_ids}", "LastElement" ]
-  accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? local.accepter_pri_rt_hack[var.accepter_route_table_idx] != "LastElement" ? local.accepter_pri_rt_hack[var.accepter_route_table_idx] : "None"  : local.accepter_pub_rt_hack[var.accepter_route_table_idx] != "LastElement" ? local.accepter_pub_rt_hack[var.accepter_route_table_idx] : ""  }"
+  accepter_route_table_id = "${ var.accepter_route_table_public_private == "public" ? local.accepter_pub_rt_hack[var.accepter_route_table_idx] != "LastElement" ? local.accepter_pub_rt_hack[var.accepter_route_table_idx] : "None"  : local.accepter_pri_rt_hack[var.accepter_route_table_idx] != "LastElement" ? local.accepter_pri_rt_hack[var.accepter_route_table_idx] : ""  }"
 }
-resource "aws_route" "appter_to_requester_route" {
+resource "aws_route" "accepter_to_requester_route" {
   //provider = "${data.terraform_remote_state.accepter_state.provider ? data.terraform_remote_state.accepter_state.provider : var.provider}"
   route_table_id = "${local.accepter_route_table_id}"
   destination_cidr_block = "${data.terraform_remote_state.requester_state.vpc_cidr_block}"
