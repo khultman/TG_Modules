@@ -83,7 +83,7 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
 }
 
 locals {
-  requester_route_table_id = "${ ${var.requester_route_table_public_private} == "public" ? ${ ${data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id} != "" ? ${data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id} : ${data.terraform_remote_state.requester_state.aws_route_table.public.id} } : ${ ${data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id} != ""? ${data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id} : ${data.terraform_remote_state.requester_state.aws_route_table.private.id} } }"
+  requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id != "" ? data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id : data.terraform_remote_state.requester_state.aws_route_table.public.id : data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id != "" ? data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id : data.terraform_remote_state.requester_state.aws_route_table.private.id }"
 }
 resource "aws_route" "requester_to_accepter_route" {
   //provider = "${data.terraform_remote_state.requester_state.provider ? data.terraform_remote_state.requester_state.provider : var.provider}"
