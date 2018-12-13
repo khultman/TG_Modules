@@ -1,4 +1,4 @@
-variable lock_table_name {}
+
 variable dynamodb_read_capacity {}
 variable dynamodb_write_capacity {}
 
