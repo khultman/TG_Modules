@@ -84,8 +84,8 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
 
 /*
   Work around for not being able to hint at a value of an empty list,
-  effectively, if there are no route tables in the source state file then this will default to "None"
-  instead of throwing a error.
+  effectively, if there are no route tables in the source state file then this will default to an appropraite string
+  indicating lack of requested route table instead of throwing a error.
 */
 locals {
   requester_pri_rt_hack = [ "${data.terraform_remote_state.requester_state.private_route_table_ids}", "LastElement" ]
