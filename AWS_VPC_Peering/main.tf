@@ -65,8 +65,8 @@ data "terraform_remote_state" "accepter_state" {
 
 resource "aws_vpc_peering_connection" "requester" {
   //provider = "${data.terraform_remote_state.requester_state.provider ? data.terraform_remote_state.requester_state.provider : var.provider}"
-  vpc_id = "${data.terraform_remote_state.requester_state.aws_vpc.this.id}"
-  peer_vpc_id = "${data.terraform_remote_state.accepter_state.aws_vpc.this.id}"
+  vpc_id = "${data.terraform_remote_state.requester_state.vpc_id}"
+  peer_vpc_id = "${data.terraform_remote_state.accepter_state.vpc_id}"
   peer_owner_id = "${data.aws_caller_identity.caller.account_id}"
   peer_region = "${var.aws_region}"
   auto_accept = "${var.requester_auto_accept}"
@@ -83,23 +83,23 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
 }
 
 locals {
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id != "" ? data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id : data.terraform_remote_state.requester_state.aws_route_table.public.id : data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id != "" ? data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id : data.terraform_remote_state.requester_state.aws_route_table.private.id }"
-  requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? "public" : "private" }"
+  requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx].id : "" : data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] : "" }"
+  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? "public" : "private" }"
 }
 resource "aws_route" "requester_to_accepter_route" {
   //provider = "${data.terraform_remote_state.requester_state.provider ? data.terraform_remote_state.requester_state.provider : var.provider}"
   route_table_id = "${local.requester_route_table_id}"
-  destination_cidr_block = "${data.terraform_remote_state.accepter_state.aws_vpc.this.cidr_block}"
+  destination_cidr_block = "${data.terraform_remote_state.accepter_state.vpc_cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
 }
 
 locals {
-  //accepter_route_table_id = "${var.accepter_route_table_public_private == "public" ? ${data.terraform_remote_state.accepter_state.aws_route_table.public[var.accepter_route_table_idx].id != "" ? data.terraform_remote_state.accepter_state.aws_route_table.public[var.accepter_route_table_idx].id : data.terraform_remote_state.accepter_state.aws_route_table.public.id} : ${data.terraform_remote_state.accepter_state.aws_route_table.private[var.accepter_route_table_idx].id != "" ? data.terraform_remote_state.accepter_state.aws_route_table.private[var.accepter_route_table_idx].id : data.terraform_remote_state.accepter_state.aws_route_table.private.id} }"
-  accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? "private" : "public" }"
+  accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : "" : data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] : "" }"
+  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? "private" : "public" }"
 }
 resource "aws_route" "appter_to_requester_route" {
   //provider = "${data.terraform_remote_state.accepter_state.provider ? data.terraform_remote_state.accepter_state.provider : var.provider}"
   route_table_id = "${local.accepter_route_table_id}"
-  destination_cidr_block = "${data.terraform_remote_state.requester_state.aws_vpc.this.cidr_block}"
+  destination_cidr_block = "${data.terraform_remote_state.requester_state.vpc_cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
 }
