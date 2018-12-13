@@ -1,15 +1,15 @@
 variable provider { default = "aws" }
 
 variable requester_auto_accept { default = false }
-variable requester_backend {}
+variable requester_backend { default = "S3" }
 variable requester_state_file {}
 variable requester_route_table_public_private { default = "public" }
 variable requester_route_table_idx { default = 0 }
 
 variable accepter_auto_accept { default = true }
-variable accepter_backend {}
+variable accepter_backend { default = "S3" }
 variable accepter_state_file {}
-variable accepter_route_table_public_private { default = "public" }
+variable accepter_route_table_public_private { default = "private" }
 variable accepter_route_table_idx { default = 0 }
 
 data "aws_caller_identity" "caller" {
