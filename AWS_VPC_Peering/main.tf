@@ -82,14 +82,15 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
+/*
+  Work around for not being able to hint at a value of an empty list,
+  effectively, if there are no route tables in the source state file then this will default to "None"
+  instead of throwing a error.
+*/
 locals {
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] :  data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] }"
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? ${ data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] : "" } : ${ data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] : "" } }"
   requester_pri_rt_hack = [ "${data.terraform_remote_state.requester_state.public_route_table_ids}", "LastElement" ]
   requester_pub_rf_hack = [ "${data.terraform_remote_state.requester_state.public_route_table_ids}", "LastElement" ]
   requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? local.requester_pub_rf_hack[var.requester_route_table_idx] != "LastElement" ? local.requester_pub_rf_hack[var.requester_route_table_idx] : "None" : local.requester_pri_rt_hack[var.requester_route_table_idx] != "LastElement" ? local.requester_pri_rt_hack[var.requester_route_table_idx] : "None"  }"
-
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? "public" : "private" }"
 }
 resource "aws_route" "requester_to_accepter_route" {
   //provider = "${data.terraform_remote_state.requester_state.provider ? data.terraform_remote_state.requester_state.provider : var.provider}"
@@ -99,13 +100,9 @@ resource "aws_route" "requester_to_accepter_route" {
 }
 
 locals {
-  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] }"
-  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? ${ data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] != data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : "" } : ${ data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] : "" } }"
   accepter_pri_rt_hack = [ "${data.terraform_remote_state.accepter_state.public_route_table_ids}", "LastElement" ]
   accepter_pub_rt_hack = [ "${data.terraform_remote_state.accepter_state.public_route_table_ids}", "LastElement" ]
   accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? local.accepter_pri_rt_hack[var.accepter_route_table_idx] != "LastElement" ? local.accepter_pri_rt_hack[var.accepter_route_table_idx] : "None"  : local.accepter_pub_rt_hack[var.accepter_route_table_idx] != "LastElement" ? local.accepter_pub_rt_hack[var.accepter_route_table_idx] : ""  }"
-
-  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? "private" : "public" }"
 }
 resource "aws_route" "appter_to_requester_route" {
   //provider = "${data.terraform_remote_state.accepter_state.provider ? data.terraform_remote_state.accepter_state.provider : var.provider}"

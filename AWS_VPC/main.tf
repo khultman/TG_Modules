@@ -469,7 +469,7 @@ resource "aws_route" "public_internet_gateway" {
 # There are so many routing tables as the largest amount of subnets of each type (really?)
 #################
 resource "aws_route_table" "private" {
-  count = "${var.create_vpc && local.max_subnet_length > 0 ? local.nat_gateway_count : 0}"
+  count = "${var.create_vpc && local.max_subnet_length > 0 ? local.nat_gateway_count >= 1 ? local.nat_gateway_count : 1 : 0}"
 
   vpc_id = "${local.vpc_id}"
 
