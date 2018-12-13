@@ -9,7 +9,7 @@ variable region_tags { default = {} }
 variable local_tags  { default = {} }
 
 provider "aws" {
-  version = ">= 1.50"
+  version = "=1.50.0"
   region  = "${var.aws_region}"
 
   assume_role {
