@@ -32,6 +32,11 @@ variable accepter_route_table_idx { default = 0 }
 data "aws_caller_identity" "caller" {
   provider = "aws"
 }
+
+/*
+  using a merged map for config wasn't working, this does but it's not as clean
+  I'll revisit this later and see if I can get the merged map working
+*/
 data "terraform_remote_state" "requester_state" {
   backend = "${var.requester_backend}"
   config {
