@@ -34,12 +34,18 @@ data "aws_caller_identity" "caller" {
 }
 data "terraform_remote_state" "requester_state" {
   backend = "${var.requester_backend}"
-  config = "${merge(var.ecosystem_config, map("key", ${var.requester_state_file}))}"
+  config = "${merge(
+    var.ecosystem_config,
+    map("key", "${var.requester_state_file}")
+  )}"
 }
 
 data "terraform_remote_state" "accepter_state" {
   backend = "${var.accepter_backend}"
-  config = "${merge(var.ecosystem_config, map("key", ${var.accepter_state_file}))}"
+  config = "${merge(
+    var.ecosystem_config,
+    map("key", "${var.accepter_state_file}")
+  )}"
 }
 
 resource "aws_vpc_peering_connection" "requester" {
