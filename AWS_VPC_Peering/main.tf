@@ -83,8 +83,9 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
 }
 
 locals {
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx].id : "" : data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] : "" }"
-  requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] :  data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] }"
+  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] :  data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] }"
+  requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? ${ data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] : "" } : ${ data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] : "" } }"
+
   //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? "public" : "private" }"
 }
 resource "aws_route" "requester_to_accepter_route" {
@@ -95,8 +96,9 @@ resource "aws_route" "requester_to_accepter_route" {
 }
 
 locals {
-  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : "" : data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] : "" }"
-  accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] }"
+  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] }"
+  accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? ${ data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] != data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : "" } : ${ data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] : "" } }"
+
   //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? "private" : "public" }"
 }
 resource "aws_route" "appter_to_requester_route" {
