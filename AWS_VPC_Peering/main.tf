@@ -82,32 +82,32 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
+locals {
+  requester_pub_subnet_id = "${data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id == "" ?
+                               data.terraform_remote_state.requester_state.aws_route_table.public.id :
+                               data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id}"
+  requester_pri_subnet_id = "${data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id == ""?
+                               data.terraform_remote_state.requester_state.aws_route_table.private.id :
+                               data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id}"
+}
 resource "aws_route" "requester_to_accepter_route" {
   //provider = "${data.terraform_remote_state.requester_state.provider ? data.terraform_remote_state.requester_state.provider : var.provider}"
-  route_table_id = "${var.requester_route_table_public_private == "public" ?
-                        data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id == "" ?
-                            data.terraform_remote_state.requester_state.aws_route_table.public.id :
-                            data.terraform_remote_state.requester_state.aws_route_table.public[var.requester_route_table_idx].id
-                        :
-                        data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id == ""?
-                            data.terraform_remote_state.requester_state.aws_route_table.private.id :
-                            data.terraform_remote_state.requester_state.aws_route_table.private[var.requester_route_table_idx].id
-                      }"
+  route_table_id = "${var.requester_route_table_public_private == "public" ? local.requester_pub_subnet_id : local.requester_pri_subnet_id}"
   destination_cidr_block = "${data.terraform_remote_state.accepter_state.aws_vpc.this.cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
 }
 
+locals {
+  accepter_pub_subnet_id = "${data.terraform_remote_state.accepter_state.aws_route_table.public[var.accepter_route_table_idx].id == "" ?
+                              data.terraform_remote_state.accepter_state.aws_route_table.public.id :
+                              data.terraform_remote_state.accepter_state.aws_route_table.public[var.accepter_route_table_idx].id}"
+  accepter_pri_subnet_id = "${data.terraform_remote_state.accepter_state.aws_route_table.private[var.accepter_route_table_idx].id == "" ?
+                              data.terraform_remote_state.accepter_state.aws_route_table.private.id :
+                              data.terraform_remote_state.accepter_state.aws_route_table.private[var.accepter_route_table_idx].id}"
+}
 resource "aws_route" "appter_to_requester_route" {
   //provider = "${data.terraform_remote_state.accepter_state.provider ? data.terraform_remote_state.accepter_state.provider : var.provider}"
-  route_table_id = "${var.accepter_route_table_public_private == "public" ?
-                        data.terraform_remote_state.accepter_state.aws_route_table.public[var.accepter_route_table_idx].id == "" ?
-                            data.terraform_remote_state.accepter_state.aws_route_table.public.id :
-                            data.terraform_remote_state.accepter_state.aws_route_table.public[var.accepter_route_table_idx].id
-                        :
-                        data.terraform_remote_state.accepter_state.aws_route_table.private[var.accepter_route_table_idx].id == "" ?
-                            data.terraform_remote_state.accepter_state.aws_route_table.private.id :
-                            data.terraform_remote_state.accepter_state.aws_route_table.private[var.accepter_route_table_idx].id
-                      }"
+  route_table_id = "${var.accepter_route_table_public_private == "public" ? local.accepter_pub_subnet_id : local.accepter_pri_subnet_id }"
   destination_cidr_block = "${data.terraform_remote_state.requester_state.aws_vpc.this.cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
 }
