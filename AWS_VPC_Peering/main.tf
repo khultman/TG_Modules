@@ -47,7 +47,6 @@ data "terraform_remote_state" "requester_state" {
     dynamodb_table = "${var.lock_table_name}"
     kms_key_id = "${var.kms_key_id}"
   }
-  // config = "${ merge( "${var.ecosystem_config}", map("key", "${var.requester_state_file}") ) }" }
 }
 
 data "terraform_remote_state" "accepter_state" {
@@ -104,6 +103,7 @@ resource "aws_route" "requester_to_accepter_route" {
   route_table_id = "${local.requester_route_table_id}"
   destination_cidr_block = "${data.terraform_remote_state.accepter_state.vpc_cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
+  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 locals {
@@ -123,4 +123,5 @@ resource "aws_route" "accepter_to_requester_route" {
   route_table_id = "${local.accepter_route_table_id}"
   destination_cidr_block = "${data.terraform_remote_state.requester_state.vpc_cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
+  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
