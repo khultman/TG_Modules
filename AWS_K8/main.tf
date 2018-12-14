@@ -280,7 +280,7 @@ resource "aws_autoscaling_group" "this" {
   max_size = "${var.eks_worker_node_max_size}"
   min_size = "${var.eks_worker_node_min_size}"
   vpc_zone_identifier = ["${local.subnet_ids}"]
-  tags = "${merge(map("Name", format("%s", var.name)), map("${format("kubrenetes.io/cluster/%s", var.eks_cluster_name)}", "owned") var.common_tags, var.region_tags, var.local_tags)}"
+  tags = "${merge(map("Name", format("%s", var.name)), map("${format("kubrenetes.io/cluster/%s", var.eks_cluster_name)}", "owned"), var.common_tags, var.region_tags, var.local_tags)}"
   /*tag {
     key = "${format("kubrenetes.io/cluster/%s", var.eks_cluster_name)}"
     value = "owned"
