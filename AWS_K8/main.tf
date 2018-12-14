@@ -105,8 +105,8 @@ resource "aws_eks_cluster" "this" {
 
   depends_on = [
     "aws_iam_role.this",
-    "aws_iam_role_policy_attachment.this.EKSClusterPolicy",
-    "aws_iam_role_policy_attachment.this.EKSServicePolicy"
+    "aws_iam_role_policy_attachment.EKSClusterPolicy",
+    "aws_iam_role_policy_attachment.EKSServicePolicy"
   ]
 
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
