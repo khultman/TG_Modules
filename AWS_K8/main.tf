@@ -51,11 +51,13 @@ resource "aws_iam_role" "this" {
 {
   "Version": "2012-10-17",
   "Statement": [
-    "Effect": "Allow",
-    "Principal": {
-      "Service": "eks.amazonaws.com"
-    },
-    "Action": "sts:AssumeRole"
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
   ]
 }
 EOF
@@ -211,7 +213,7 @@ resource "aws_security_group_rule" "worker-node-ingress-self" {
   to_port = 65535
   type = "ingress"
 
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_security_group_rule" "worker-node-ingress-cluster" {
@@ -223,7 +225,7 @@ resource "aws_security_group_rule" "worker-node-ingress-cluster" {
   to_port = 65535
   type = "ingress"
 
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_security_group_rule" "worker-node-ingress-https" {
@@ -235,7 +237,7 @@ resource "aws_security_group_rule" "worker-node-ingress-https" {
   to_port = 443
   type = "ingress"
 
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 data "aws_ami" "eks-worker-ami" {
@@ -278,12 +280,12 @@ resource "aws_autoscaling_group" "this" {
   max_size = "${var.eks_worker_node_max_size}"
   min_size = "${var.eks_worker_node_min_size}"
   vpc_zone_identifier = ["${local.subnet_ids}"]
-  tags = "${merge(  map("Name", format("%s", var.name)),
-                    var.common_tags,
-                    var.region_tags,
-                    var.local_tags,
-                    map( format("kubrenetes.io/cluster/%s", var.eks_cluster_name), "owned")
-   )}"
+  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  tag {
+    key = "${format("kubrenetes.io/cluster/%s", var.eks_cluster_name)}"
+    value = "owned"
+    propagate_at_launch = true
+   }
 }
 
 locals {
