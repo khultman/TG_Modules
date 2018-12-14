@@ -93,9 +93,9 @@ resource "aws_security_group" "this" {
 
 locals {
   /*subnet_ids = "${ var.vpc_public_private_subnets == "public" ?
-                    data.terraform_remote_state.vpc.public_route_table_ids :
-                    data.terraform_remote_state.vpc.private_route_table_ids }"*/
-  subnet_ids = "${data.terraform_remote_state.vpc.public_route_table_ids}" ## Above not working, error: conditional operator cannot be used with list values
+                    data.terraform_remote_state.vpc.public_subnets :
+                    data.terraform_remote_state.vpc.private_subnets }"*/
+  subnet_ids = "${data.terraform_remote_state.vpc.public_subnets}" ## Above not working, error: conditional operator cannot be used with list values
 }
 resource "aws_eks_cluster" "this" {
   name     = "${var.eks_cluster_name}"
