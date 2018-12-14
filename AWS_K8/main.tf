@@ -323,7 +323,7 @@ output "kubeconfig-certificate-authority-data" {
 }
 
 output "vpc_id" {
-  value = "${aws_eks_cluster.this.vpc_config.vpc_id}"
+  value = "${data.terraform_remote_state.vpc.id}"
 }
 
 output "version" {
