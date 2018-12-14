@@ -65,13 +65,13 @@ EOF
 resource "aws_iam_role_policy_attachment" "EKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = "${aws_iam_role.this.name}"
-  tags       = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags       = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_iam_role_policy_attachment" "EKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = "${aws_iam_role.this.name}"
-  tags       = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags       = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_security_group" "this" {
@@ -109,7 +109,7 @@ resource "aws_eks_cluster" "this" {
     "aws_iam_role_policy_attachment.EKSServicePolicy"
   ]
 
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 locals {
@@ -166,25 +166,25 @@ EOF
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = "${aws_iam_role.worker_role.name}"
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = "${aws_iam_role.worker_role.name}"
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = "${aws_iam_role.worker_role.name}"
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_iam_instance_profile" "this" {
   name = "${var.eks_cluster_name}-worker-profile"
   role = "${aws_iam_role.worker_role.name}"
-  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+  #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 resource "aws_security_group" "worker-sg" {
@@ -282,7 +282,7 @@ resource "aws_autoscaling_group" "this" {
                     var.common_tags,
                     var.region_tags,
                     var.local_tags,
-                    map( concat("kubrenetes.io/cluster/", var.eks_cluster_name), "owned")
+                    map( format("kubrenetes.io/cluster/%s", var.eks_cluster_name), "owned")
    )}"
 }
 
