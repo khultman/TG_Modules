@@ -62,13 +62,13 @@ EOF
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
-resource "aws_iam_role_policy_attachment" "this.EKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "EKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = "${aws_iam_role.this.name}"
   tags       = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
-resource "aws_iam_role_policy_attachment" "this.EKSServicePolicy" {
+resource "aws_iam_role_policy_attachment" "EKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = "${aws_iam_role.this.name}"
   tags       = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
