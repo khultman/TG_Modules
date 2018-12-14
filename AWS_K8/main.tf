@@ -277,6 +277,7 @@ resource "aws_launch_configuration" "this" {
 
 resource "aws_autoscaling_group" "this" {
   name = "eks_worker_asg-${var.eks_cluster_name}"
+  launch_configuration = "${aws_launch_configuration.this.id}"
   desired_capacity = "${var.eks_worker_node_desired_capacity}"
   max_size = "${var.eks_worker_node_max_size}"
   min_size = "${var.eks_worker_node_min_size}"
@@ -287,6 +288,7 @@ resource "aws_autoscaling_group" "this" {
     value = "owned"
     propagate_at_launch = true
    }*/
+  depends_on = [ "aws_launch_configuration.this"]
 }
 
 locals {
