@@ -47,7 +47,6 @@ data "terraform_remote_state" "requester_state" {
     dynamodb_table = "${var.lock_table_name}"
     kms_key_id = "${var.kms_key_id}"
   }
-  // config = "${ merge( "${var.ecosystem_config}", map("key", "${var.requester_state_file}") ) }" }
 }
 
 data "terraform_remote_state" "accepter_state" {
@@ -82,30 +81,47 @@ resource "aws_vpc_peering_connection_accepter" "accepter" {
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
+/*
+  Work around for not being able to hint at a value of an empty list,
+  effectively, if there are no route tables in the source state file then this will default to an appropraite string
+  indicating lack of requested route table instead of throwing a error.
+*/
 locals {
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] :  data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] }"
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? ${ data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] : "" } : ${ data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] : "" } }"
-  requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.public_route_table_ids[var.requester_route_table_idx] : "" : data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] != "" ? data.terraform_remote_state.requester_state.private_route_table_ids[var.requester_route_table_idx] : ""  }"
+  requester_pri_rt_hack = [ "${data.terraform_remote_state.requester_state.private_route_table_ids}", "LastElement" ]
+  requester_pub_rf_hack = [ "${data.terraform_remote_state.requester_state.public_route_table_ids}", "LastElement" ]
 
-  //requester_route_table_id = "${ var.requester_route_table_public_private == "public" ? "public" : "private" }"
+  requester_route_table_id = "${ var.requester_route_table_public_private == "public" ?
+                                   local.requester_pub_rf_hack[var.requester_route_table_idx] != "LastElement" ?
+                                     local.requester_pub_rf_hack[var.requester_route_table_idx] : "No public route table ID"
+                                 : var.requester_route_table_public_private == "private" ?
+                                   local.requester_pri_rt_hack[var.requester_route_table_idx] != "LastElement" ?
+                                     local.requester_pri_rt_hack[var.requester_route_table_idx] : "No private route table ID"
+                                  : "Public/Private not specified"}"
 }
 resource "aws_route" "requester_to_accepter_route" {
   //provider = "${data.terraform_remote_state.requester_state.provider ? data.terraform_remote_state.requester_state.provider : var.provider}"
   route_table_id = "${local.requester_route_table_id}"
   destination_cidr_block = "${data.terraform_remote_state.accepter_state.vpc_cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
+  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
 locals {
-  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] }"
-  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? ${ data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] != data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : "" } : ${ data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] : "" } }"
-  accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.private_route_table_ids[var.accepter_route_table_idx] : ""  : data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] != "" ? data.terraform_remote_state.accepter_state.public_route_table_ids[var.accepter_route_table_idx] : ""  }"
+  accepter_pri_rt_hack = [ "${data.terraform_remote_state.accepter_state.private_route_table_ids}", "LastElement" ]
+  accepter_pub_rt_hack = [ "${data.terraform_remote_state.accepter_state.public_route_table_ids}", "LastElement" ]
 
-  //accepter_route_table_id = "${ var.accepter_route_table_public_private == "private" ? "private" : "public" }"
+  accepter_route_table_id = "${ var.accepter_route_table_public_private == "public" ?
+                                  local.accepter_pub_rt_hack[var.accepter_route_table_idx] != "LastElement" ?
+                                    local.accepter_pub_rt_hack[var.accepter_route_table_idx] : "No public route table ID"
+                                : var.accepter_route_table_public_private == "private" ?
+                                  local.accepter_pri_rt_hack[var.accepter_route_table_idx] != "LastElement" ?
+                                    local.accepter_pri_rt_hack[var.accepter_route_table_idx] : "No private route table ID"
+                                : "Public/Private not specified"}"
 }
-resource "aws_route" "appter_to_requester_route" {
+resource "aws_route" "accepter_to_requester_route" {
   //provider = "${data.terraform_remote_state.accepter_state.provider ? data.terraform_remote_state.accepter_state.provider : var.provider}"
   route_table_id = "${local.accepter_route_table_id}"
   destination_cidr_block = "${data.terraform_remote_state.requester_state.vpc_cidr_block}"
   vpc_peering_connection_id = "${aws_vpc_peering_connection.requester.id}"
+  tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
