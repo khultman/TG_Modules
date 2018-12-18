@@ -283,6 +283,7 @@ resource "aws_launch_configuration" "this" {
   name_prefix = "worker-${var.eks_cluster_name}-"
   security_groups = ["${aws_security_group.worker-sg.id}"]
   user_data_base64 = "${base64encode(local.eks_worker_node_userdata)}"
+  key_name = "${var.ssh_key_name}"
   lifecycle {
     create_before_destroy = true
   }

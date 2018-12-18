@@ -13,6 +13,8 @@ variable common_tags { default = {} }
 variable region_tags { default = {} }
 variable local_tags  { default = {} }
 
+variable ssh_key_name { default = "" }
+
 provider "aws" {
   version = "=1.50.0"
   region  = "${var.aws_region}"
