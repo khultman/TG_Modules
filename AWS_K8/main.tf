@@ -270,7 +270,7 @@ locals {
   eks_worker_node_userdata = <<EOF
 #!/bin/bash
 set -o xtrace
-/etc/eks/bootstrap.sh --apiserver-endpoint ${aws_eks_cluster.this.endpoint} --b64-cluster-ca ${aws_eks_cluster.this.certificate_authority.0.data} ${var.eks_cluster_name}
+/etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.this.endpoint}' --b64-cluster-ca '${aws_eks_cluster.this.certificate_authority.0.data}' '${var.eks_cluster_name}'
 EOF
 }
 
