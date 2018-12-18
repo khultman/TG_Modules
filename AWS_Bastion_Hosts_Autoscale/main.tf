@@ -42,7 +42,7 @@ data "terraform_remote_state" "vpc" {
 
 resource "aws_security_group" "bastion_sg" {
   name        = "SG-bastionhosts-${var.name}"
-  description = "EKS cluster communication with worker nodes"
+  description = "SG for Bastion hosts"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   egress {
@@ -127,7 +127,7 @@ resource "aws_autoscaling_group" "bastion-asg" {
 
 resource "aws_security_group" "bastion_lb_sg" {
   name        = "SG-lb-${var.name}"
-  description = "EKS cluster communication with worker nodes"
+  description = "Bastion host SG for LB front end"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   egress {
