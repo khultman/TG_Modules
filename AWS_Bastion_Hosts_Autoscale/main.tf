@@ -126,7 +126,7 @@ resource "aws_autoscaling_group" "bastion-asg" {
 }
 
 resource "aws_security_group" "bastion_lb_sg" {
-  name        = "SG-bastionhosts-${var.name}"
+  name        = "SG-lb-${var.name}"
   description = "EKS cluster communication with worker nodes"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
