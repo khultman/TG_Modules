@@ -15,6 +15,9 @@ variable local_tags  { default = {} }
 
 variable ssh_key_name { default = "" }
 
+variable bastion_backend { default = "s3" }
+variable bastion_state_file {}
+
 provider "aws" {
   version = "=1.50.0"
   region  = "${var.aws_region}"

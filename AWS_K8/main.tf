@@ -44,6 +44,18 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
+data "terraform_remote_state" "bastion" {
+  backend = "${var.bastion_backend}"
+  config {
+    bucket = "${var.state_bucket_name}"
+    region = "${var.aws_region}"
+    key = "${var.bastion_state_file}"
+    encrypt = true
+    dynamodb_table = "${var.lock_table_name}"
+    kms_key_id = "${var.kms_key_id}"
+  }
+}
+
 resource "aws_iam_role" "this" {
   name = "${var.eks_role_name}-${var.eks_cluster_name}"
 
@@ -90,8 +102,6 @@ resource "aws_security_group" "this" {
 
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
-
-
 
 locals {
   /*subnet_ids = "${ var.vpc_public_private_subnets == "public" ?
@@ -205,6 +215,16 @@ resource "aws_security_group" "worker-sg" {
   }
 
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
+}
+
+resource "aws_security_group_rule" "bastion-worker-ssh" {
+  description = "Allow bastion hosts to ssh into worker nodes"
+  from_port = 22
+  protocol = "TCP"
+  security_group_id = "${aws_security_group.worker-sg.id}"
+  source_security_group_id = "${data.terraform_remote_state.bastion.bastion_sg_id}"
+  to_port = 22
+  type = "ingress"
 }
 
 resource "aws_security_group_rule" "worker-node-ingress-self" {
