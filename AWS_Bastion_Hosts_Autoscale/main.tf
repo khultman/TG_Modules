@@ -145,7 +145,7 @@ locals {
 }
 
 locals {
-  lbid = "${substr(format("%s", join("-", split("_", local.lbidt))), 0, 27)}"
+  lbid = "${substr(format("%s", join("-", split("_", local.lbidt))), 0, length(var.name) <= 27 ? length(var.name) : 27 )}"
 }
 
 resource "aws_lb" "bastion_lb" {
