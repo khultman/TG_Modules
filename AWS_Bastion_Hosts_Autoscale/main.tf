@@ -140,8 +140,16 @@ resource "aws_security_group" "bastion_lb_sg" {
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
 
+locals {
+  lbidt = "${format("%s", join("-", split(".", var.name)))}"
+}
+
+locals {
+  lbid = "${substr(format("%s", join("-", split("_", local.lbidt))), 0, 27)}"
+}
+
 resource "aws_lb" "bastion_lb" {
-  name = "bastion_host_lb-${var.name}"
+  name = "lb-${local.lbid}"
   internal = false
   load_balancer_type = "application"
   security_groups = ["${aws_security_group.bastion_lb_sg.id}"]
@@ -151,7 +159,7 @@ resource "aws_lb" "bastion_lb" {
 }
 
 resource "aws_lb_target_group" "bastion_lb_tg" {
-  name = "bastion-tg-${var.name}"
+  name = "tg-${local.lbid}"
   port = "${var.bastion_host_ssh_port}"
   protocol = "TCP"
   vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
