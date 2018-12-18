@@ -152,7 +152,7 @@ resource "aws_lb" "bastion_lb" {
   name = "lb-${local.lbid}"
   internal = false
   load_balancer_type = "network"
-  security_groups = ["${aws_security_group.bastion_lb_sg.id}"]
+  //security_groups = ["${aws_security_group.bastion_lb_sg.id}"]
   subnets = ["${local.subnet_ids}"]
   enable_deletion_protection = false
   tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
