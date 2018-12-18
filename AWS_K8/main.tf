@@ -223,8 +223,8 @@ resource "aws_security_group_rule" "worker-node-ingress-cluster" {
   description = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
   from_port = 1024
   protocol = "tcp"
-  security_group_id = "${aws_security_group.this.id}"
-  source_security_group_id = "${aws_security_group.worker-sg.id}"
+  security_group_id = "${aws_security_group.worker-sg.id}"
+  source_security_group_id = "${aws_security_group.this.id}"
   to_port = 65535
   type = "ingress"
 
@@ -235,13 +235,24 @@ resource "aws_security_group_rule" "worker-node-ingress-https" {
   description = "Allow pods to communicate with the cluster API Server"
   from_port = 443
   protocol = "tcp"
-  security_group_id = "${aws_security_group.this.id}"
-  source_security_group_id = "${aws_security_group.worker-sg.id}"
+  security_group_id = "${aws_security_group.worker-sg.id}"
+  source_security_group_id = "${aws_security_group.this.id}"
   to_port = 443
   type = "ingress"
 
   #tags = "${merge(map("Name", format("%s", var.name)), var.common_tags, var.region_tags, var.local_tags)}"
 }
+
+resource "aws_security_group_rule" "worker-node-ingress-controlplane-443" {
+  description = "Allow pods to communicate with the cluster API Server"
+  from_port = 443
+  protocol = "tcp"
+  security_group_id = "${aws_security_group.this.id}"
+  source_security_group_id = "${aws_security_group.worker-sg.id}"
+  to_port = 443
+  type = "ingress"
+}
+
 
 data "aws_ami" "eks-worker-ami" {
   filter {
