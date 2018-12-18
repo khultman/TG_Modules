@@ -151,7 +151,7 @@ locals {
 resource "aws_lb" "bastion_lb" {
   name = "lb-${local.lbid}"
   internal = false
-  load_balancer_type = "application"
+  load_balancer_type = "network"
   security_groups = ["${aws_security_group.bastion_lb_sg.id}"]
   subnets = ["${local.subnet_ids}"]
   enable_deletion_protection = false
@@ -165,7 +165,7 @@ resource "aws_lb_target_group" "bastion_lb_tg" {
   vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
 }
 
-/*resource "aws_lb_listener" "bastion_lb_listener" {
+resource "aws_lb_listener" "bastion_lb_listener" {
   load_balancer_arn = "${aws_lb.bastion_lb.arn}"
   port = "${var.bastion_host_ssh_port}"
   protocol = "TCP"
@@ -173,7 +173,7 @@ resource "aws_lb_target_group" "bastion_lb_tg" {
     type = "forward"
     target_group_arn = "${aws_lb_target_group.bastion_lb_tg.arn}"
   }
-}*/
+}
 
 
 output "lb_dns_name" {
